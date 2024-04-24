@@ -1,0 +1,22 @@
+funciones:
+	-moverse en la matriz
+	-dar vueltas, izq o der
+	-lanza el dado y mueje a jazam x caisllas
+
+	-Cuando sale del tablero darle la vuelta
+
+	-Validar en cada movimento si hazam esta parado en una alfombra
+	 -Si si esta en una alfombra que no es propia
+	 -Cantidad de alfombras adyacentes
+	 -cantidad de monedas que pierde
+	 -si la cantidad de monedas es =< que 0 el jugador pierde
+
+	-Colocar alfombras en una posicion entre 4 y validad que no tape por
+	 completo otra alfombra de otro jugador 
+	
+	-si el tablero esta completo terminar el juego
+
+ideas:
+	-empezamos desde la la casilla #24 teniendo en cuenta que la matriz empieza desde 0. Teniendo en cuenta esto podemos tener una funcion para movernos y posicionar alfombras con los for para desplegar la matriz que los posibles movimiento sean con j+1 o j-1 para der y izq y i-1 y i+1 para arriba y abajo correspondiendo este ultimo con la posicion de filas  y el anterior con la posicion de columnas
+	-Para el caso de que jonas se salga de la matriz, podemos preestablecer que si intenta pasar de cieta casilla pase a otra, esto pasa cambiando las columnas porque reccordemos que las filas siempre van hasta 7, en base a esto y la posicion de la matriz podemos preestablecer lo que pasa con esto. ##SE PUEDE MEJORAR##
+	-Usar libreria random para generar numeros random
