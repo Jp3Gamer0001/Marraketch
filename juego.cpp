@@ -1,6 +1,6 @@
 #include <iostream>
 #include <cstdlib> // Para la función rand() y srand()
-#include <ctime> // Para la función time()
+#include <ctime>   // Para la función time()
 using namespace std;
 
 const int FILAS = 7;
@@ -26,8 +26,8 @@ void limpiarTerminal() {
 // Función para inicializar el tablero con casillas blancas y negras
 void inicializarTablero(Tablero &tablero) {
     for (int i = 0; i < FILAS; ++i) {
-        for (int j = 0; j < COLUMNAS; ++j){
-                tablero.casillas[i][j] = 'O';
+        for (int j = 0; j < COLUMNAS; ++j) {
+                tablero.casillas[i][j] = 'O'; // Casilla blanca
         }
     }
 }
@@ -44,6 +44,36 @@ void mostrarTableroConPersonaje(const Tablero &tablero, const Personaje &persona
         }
         cout << endl;
     }
+}
+
+// Función para mover al personaje en una dirección dada
+void moverPersonaje(Personaje &personaje, char direccion, int movimientos) {
+    switch (direccion) {
+        case 'W':
+        case 'w':
+            personaje.fila -= movimientos;
+            break;
+        case 'A':
+        case 'a':
+            personaje.columna -= movimientos;
+            break;
+        case 'S':
+        case 's':
+            personaje.fila += movimientos;
+            break;
+        case 'D':
+        case 'd':
+            personaje.columna += movimientos;
+            break;
+        default:
+            cout << "Dirección no válida. El personaje no se ha movido." << endl;
+    }
+
+    // Mantener al personaje dentro del tablero
+    if (personaje.fila < 0) personaje.fila = 0;
+    if (personaje.fila >= FILAS) personaje.fila = FILAS - 1;
+    if (personaje.columna < 0) personaje.columna = 0;
+    if (personaje.columna >= COLUMNAS) personaje.columna = COLUMNAS - 1;
 }
 
 int main() {
@@ -63,8 +93,8 @@ int main() {
 
     // Bucle principal para permitir que el usuario se mueva por el tablero
     while (!salir) {
+        
         limpiarTerminal(); // Limpiar la terminal antes de mostrar el tablero
-
         // Mostrar el tablero con el personaje
         mostrarTableroConPersonaje(tablero, personaje);
 
@@ -81,33 +111,8 @@ int main() {
             char direccion;
             cin >> direccion;
 
-            // Actualizar la posición del personaje según la dirección elegida
-            switch (direccion) {
-                case 'W':
-                case 'w':
-                    personaje.fila -= movimientos;
-                    break;
-                case 'A':
-                case 'a':
-                    personaje.columna -= movimientos;
-                    break;
-                case 'S':
-                case 's':
-                    personaje.fila += movimientos;
-                    break;
-                case 'D':
-                case 'd':
-                    personaje.columna += movimientos;
-                    break;
-                default:
-                    cout << "Dirección no válida. El personaje no se ha movido." << endl;
-            }
-
-            // Mantener al personaje dentro del tablero
-            if (personaje.fila < 0) personaje.fila = 0;
-            if (personaje.fila >= FILAS) personaje.fila = FILAS - 1;
-            if (personaje.columna < 0) personaje.columna = 0;
-            if (personaje.columna >= COLUMNAS) personaje.columna = COLUMNAS - 1;
+            // Mover al personaje en la dirección dada
+            moverPersonaje(personaje, direccion, movimientos);
         } else {
             cout << "Entrada no válida. Presiona 'L' para lanzar el dado o 'Q' para salir." << endl;
         }
@@ -115,4 +120,3 @@ int main() {
 
     return 0;
 }
-
