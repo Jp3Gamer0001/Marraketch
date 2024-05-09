@@ -23,11 +23,10 @@ void limpiarTerminal() {
     system("clear"); // Ejecutar el comando clear en la terminal
 }
 
-// Función para inicializar el tablero con casillas blancas y negras
 void inicializarTablero(Tablero &tablero) {
-    for (int i = 0; i < FILAS; ++i) {
+    for (int i = 0; i < FILAS; ++i) {   
         for (int j = 0; j < COLUMNAS; ++j) {
-                tablero.casillas[i][j] = 'O'; // Casilla blanca
+                tablero.casillas[i][j] = 'O'; 
         }
     }
 }
@@ -37,9 +36,9 @@ void mostrarTableroConPersonaje(const Tablero &tablero, const Personaje &persona
     for (int i = 0; i < FILAS; ++i) {
         for (int j = 0; j < COLUMNAS; ++j) {
             if (i == personaje.fila && j == personaje.columna) {
-                cout << personaje.icono << " "; // Mostrar el personaje en su posición
+                cout <<"[ " << personaje.icono << " ]"; // Mostrar el personaje en su posición
             } else {
-                cout << tablero.casillas[i][j] << " "; // Mostrar la casilla del tablero
+                cout << "[ "<<tablero.casillas[i][j] << " ]"; // Mostrar la casilla del tablero
             }
         }
         cout << endl;
