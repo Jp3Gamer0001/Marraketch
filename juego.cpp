@@ -50,70 +50,119 @@ void mostrarTableroConPersonaje(const Tablero &tablero, const Personaje &persona
     for (int i = 0; i < FILAS; ++i) {
         for (int j = 0; j < COLUMNAS; ++j) {
             if (i == personaje.fila && j == personaje.columna) {
-                cout <<"[ " << personaje.icono << " ]"; // Mostrar assam en su posición
+                cout << "[" ;
+                // Mostrar la dirección en la que Assam está mirando
+                switch (personaje.vision) {
+                    case 'w':
+                        cout << " ^ ";
+                        break;
+                    case 's':
+                        cout << " v ";
+                        break;
+                    case 'd':
+                        cout << " > ";
+                        break;
+                    case 'a':
+                        cout << " < ";
+                        break;
+                    default:
+                        cout << " ? "; // Mostrar un carácter '?' si la dirección es desconocida
+                        break;
+                }
+                cout << "]";
             } else {
-                cout << "[ "<<tablero.casillas[i][j] << " ]"; // Mostrar la casilla del tablero
+                cout << "[ " << tablero.casillas[i][j] << " ]"; // Mostrar la casilla del tablero
             }
         }
         cout << endl;
     }
 }
 
-// Función para mover al personaje en una dirección dada
-void moverPersonaje(Personaje &personaje, char direccion, int movimientos, char vision) {
-    // Determinar la dirección opuesta basada en la visión actual de Assam
+
+
+char validarDireccionOpuesta(char vision) {
     char direccionOpuesta;
     switch (vision) {
-        case 'N':
+        case 'w':
             direccionOpuesta = 's';
             break;
-        case 'S':
+        case 's':
             direccionOpuesta = 'w';
             break;
-        case 'E':
+        case 'd':
             direccionOpuesta = 'a';
             break;
-        case 'O':
+        case 'a':
             direccionOpuesta = 'd';
             break;
         default:
             cout << "Error: Visión no válida." << endl;
-            break;; // Salir de la función si la visión es inválida
+            return false; // Salir de la función si la visión es inválida
     }
 
-    // Verificar si la dirección solicitada es la opuesta a la visión actual de Assam
-    if (direccion == direccionOpuesta) {
-        cout << "Assam no puede caminar hacia atrás." << endl;
-    } else {
-    // Mover al personaje en la dirección dada
-    switch (direccion) {
-        case 'W':
-        case 'w':
-            personaje.fila -= movimientos;
-            break;
-        case 'A':
-        case 'a':
-            personaje.columna -= movimientos;
-            break;
-        case 'S':
-        case 's':
-            personaje.fila += movimientos;
-            break;
-        case 'D':
-        case 'd':
-            personaje.columna += movimientos;
-            break;
-        default:
-            cout << "Dirección no válida. Assam no se ha movido." << endl;
-    }
-    }
+    return direccionOpuesta;
+}
+
+// Función para mover al personaje en una dirección dada
+void moverPersonaje(Personaje &personaje, char direccion, int movimientos, char &vision) {
+    // Determinar la dirección opuesta basada en la visión actual de Assam
+    char direccionOpuesta;
+    bool flag = false;
+    char nuevaVision;
+
+    do {
+        direccionOpuesta = validarDireccionOpuesta(vision);
+        cout << "Cambia hacia dónde Assam mira (w: arriba, a: izquierda, s: abajo, d: derecha): ";
+        cin >> nuevaVision;
+
+        if (direccionOpuesta == nuevaVision) {
+            cout << "Assam no puede mirar hacia atrás" << endl;
+        } else {
+            flag = true;
+        }
+    } while (!flag);
+
+    vision = nuevaVision; // Actualizar la visión con la nueva dirección válida
+    direccionOpuesta = validarDireccionOpuesta(vision);
+
+    do {
+        cout << "Elige en qué dirección deseas moverte (w: arriba, a: izquierda, s: abajo, d: derecha): ";
+        cin >> direccion;
+
+        // Verificar si la dirección solicitada es la opuesta a la visión actual de Assam
+        if (direccion == direccionOpuesta) {
+            cout << "Assam no puede caminar hacia atrás." << endl;
+        } else {
+            // Mover al personaje en la dirección dada
+            switch (direccion) {
+                case 'W':
+                case 'w':
+                    personaje.fila -= movimientos;
+                    break;
+                case 'A':
+                case 'a':
+                    personaje.columna -= movimientos;
+                    break;
+                case 'S':
+                case 's':
+                    personaje.fila += movimientos;
+                    break;
+                case 'D':
+                case 'd':
+                    personaje.columna += movimientos;
+                    break;
+                default:
+                    cout << "Dirección no válida. Assam no se ha movido." << endl;
+            }
+        }
+    } while (direccion == direccionOpuesta); // Continuar preguntando hasta que la dirección sea válida
 
 
     /* Comentario futuro: al hacer esto peremos los movimientos extra que hemos hecho, esto quiere decir que si assam se sale de la matriz y gira, este pierde todos los movimientos extra que halla hecho. Para solventar esto podemos restar la diferencia de le saca al tablero para calcular cuanto debe andar en la direccion "vision" que se implementara a assam */
 
     // mover atravez del tablero a assam
     if (personaje.fila < 0 && personaje.fila!=0){ 
-        personaje.vision='d';
+        vision='s';
         if (personaje.columna%2==0){
             personaje.fila = 0;
             personaje.columna-=1;
@@ -124,7 +173,7 @@ void moverPersonaje(Personaje &personaje, char direccion, int movimientos, char 
     }
 
     if (personaje.fila >= FILAS && personaje.fila!=6){
-        personaje.vision='a';
+        vision='w';
         if (personaje.columna%2==0){
             personaje.fila = 6;
             personaje.columna+=1;
@@ -136,7 +185,7 @@ void moverPersonaje(Personaje &personaje, char direccion, int movimientos, char 
     
 
     if (personaje.columna < 0 && personaje.columna!=0) { 
-        personaje.vision='s';
+        vision='d';
         if (personaje.fila%2==0){
             personaje.columna = 0;
             personaje.fila-=1;
@@ -147,7 +196,7 @@ void moverPersonaje(Personaje &personaje, char direccion, int movimientos, char 
     }
 
     if (personaje.columna >= COLUMNAS && personaje.columna!=6){
-        personaje.vision='w';
+        vision='a';
         if (personaje.fila%2==0){
             personaje.columna = 6;
             personaje.fila+=1;
@@ -158,14 +207,28 @@ void moverPersonaje(Personaje &personaje, char direccion, int movimientos, char 
     }
     
 
-    if (personaje.columna==0 && personaje.fila<0 || personaje.fila==0 && personaje.columna<0){
-        //toca hacer 2 ifs porque personaje.vision=''; cambia 
+    if (personaje.columna==0 && personaje.fila<0){
+        vision='s';
         personaje.fila = 0;
         personaje.columna = 0;
     }
 
-    if (personaje.columna==6 && personaje.fila>6 || personaje.fila==6 && personaje.columna>6){
-        //toca hacer 2 ifs porque personaje.vision=''; cambia 
+    if (personaje.fila==0 && personaje.columna<0){
+        vision='d';
+        personaje.fila = 0;
+        personaje.columna = 0;
+    }
+    
+    if (personaje.columna==6 && personaje.fila>6){
+        vision='w';
+        personaje.fila = 6;
+        personaje.columna = 6;
+    }
+
+    /*Falta revisar esto, no se cumple en todos los casos*/
+
+    if (personaje.fila==6 && personaje.columna>6){
+        vision='a';
         personaje.fila = 6;
         personaje.columna = 6;
     }
@@ -184,10 +247,11 @@ int main() {
     personaje.fila = FILAS / 2;
     personaje.columna = COLUMNAS / 2;
     personaje.icono = 'H'; // Por ejemplo, 'H' para Assam
-    personaje.vision = 'N'; // Establecer la dirección de visión de Assam al norte
+    personaje.vision = 'w'; // Establecer la dirección de visión de Assam al norte
 
     char lanzarDado;
     bool salir = false;
+    char direccion;
 
     // Bucle principal para permitir que el usuario se mueva por el tablero
     while (!salir) {
@@ -205,10 +269,6 @@ int main() {
         } else if (lanzarDado == 'L' || lanzarDado == 'l') {
             int movimientos = rand() % 6 + 1; // Lanzar el dado (número aleatorio entre 1 y 6)
             cout << "Has lanzado un " << movimientos << ". ";
-            cout << "Elige en qué dirección deseas moverte (W: arriba, A: izquierda, S: abajo, D: derecha): ";
-            char direccion;
-            cin >> direccion;
-
             // Mover al personaje en la dirección dada, excluyendo caminar hacia atrás
             moverPersonaje(personaje, direccion, movimientos, personaje.vision);
         } else {
@@ -217,5 +277,5 @@ int main() {
     }
 
     return 0;
-} /*arreglar bugs y continuidad, no despliega varios cout, ya que limpia la terminal muy rapido. cuando la direccion no es valida lanza de nuevo el dado lo cual no deberia ser posible*/
+} /*arreglar bugs, no despliega varios cout, ya que limpia la terminal muy rapido. Ademas el juego solo permite que assam se mueva en linea recta, toca hacer otra funcion para que assam mire y revisar el codigo*/
 
