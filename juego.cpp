@@ -16,7 +16,21 @@ struct Personaje {
     int fila;
     int columna;
     char icono;
+    char vision; //hacia adonde assam està mirando
 };
+
+struct Alfombra {
+    int fila;
+    int columna;
+    char propietario; // Por ejemplo, '1' para jugador 1 y '2' para jugador 2
+};
+
+/*struct Jugador {
+    string nombre;
+    vector<Alfombra> alfombras;
+    int monedasTotales;
+};*/
+
 
 // Función para limpiar la terminal en Linux
 void limpiarTerminal() {
@@ -31,12 +45,12 @@ void inicializarTablero(Tablero &tablero) {
     }
 }
 
-// Función para mostrar el tablero con el personaje
+// Función para mostrar el tablero con assam
 void mostrarTableroConPersonaje(const Tablero &tablero, const Personaje &personaje) {
     for (int i = 0; i < FILAS; ++i) {
         for (int j = 0; j < COLUMNAS; ++j) {
             if (i == personaje.fila && j == personaje.columna) {
-                cout <<"[ " << personaje.icono << " ]"; // Mostrar el personaje en su posición
+                cout <<"[ " << personaje.icono << " ]"; // Mostrar assam en su posición
             } else {
                 cout << "[ "<<tablero.casillas[i][j] << " ]"; // Mostrar la casilla del tablero
             }
@@ -46,7 +60,32 @@ void mostrarTableroConPersonaje(const Tablero &tablero, const Personaje &persona
 }
 
 // Función para mover al personaje en una dirección dada
-void moverPersonaje(Personaje &personaje, char direccion, int movimientos) {
+void moverPersonaje(Personaje &personaje, char direccion, int movimientos, char vision) {
+    // Determinar la dirección opuesta basada en la visión actual de Assam
+    char direccionOpuesta;
+    switch (vision) {
+        case 'N':
+            direccionOpuesta = 's';
+            break;
+        case 'S':
+            direccionOpuesta = 'w';
+            break;
+        case 'E':
+            direccionOpuesta = 'a';
+            break;
+        case 'O':
+            direccionOpuesta = 'd';
+            break;
+        default:
+            cout << "Error: Visión no válida." << endl;
+            break;; // Salir de la función si la visión es inválida
+    }
+
+    // Verificar si la dirección solicitada es la opuesta a la visión actual de Assam
+    if (direccion == direccionOpuesta) {
+        cout << "Assam no puede caminar hacia atrás." << endl;
+    } else {
+    // Mover al personaje en la dirección dada
     switch (direccion) {
         case 'W':
         case 'w':
@@ -65,14 +104,73 @@ void moverPersonaje(Personaje &personaje, char direccion, int movimientos) {
             personaje.columna += movimientos;
             break;
         default:
-            cout << "Dirección no válida. El personaje no se ha movido." << endl;
+            cout << "Dirección no válida. Assam no se ha movido." << endl;
+    }
     }
 
-    // Mantener al personaje dentro del tablero
-    if (personaje.fila < 0) personaje.fila = 0;
-    if (personaje.fila >= FILAS) personaje.fila = FILAS - 1;
-    if (personaje.columna < 0) personaje.columna = 0;
-    if (personaje.columna >= COLUMNAS) personaje.columna = COLUMNAS - 1;
+
+    /* Comentario futuro: al hacer esto peremos los movimientos extra que hemos hecho, esto quiere decir que si assam se sale de la matriz y gira, este pierde todos los movimientos extra que halla hecho. Para solventar esto podemos restar la diferencia de le saca al tablero para calcular cuanto debe andar en la direccion "vision" que se implementara a assam */
+
+    // mover atravez del tablero a assam
+    if (personaje.fila < 0 && personaje.fila!=0){ 
+        personaje.vision='d';
+        if (personaje.columna%2==0){
+            personaje.fila = 0;
+            personaje.columna-=1;
+        } else{
+            personaje.fila = 0;
+            personaje.columna+=1;
+        }
+    }
+
+    if (personaje.fila >= FILAS && personaje.fila!=6){
+        personaje.vision='a';
+        if (personaje.columna%2==0){
+            personaje.fila = 6;
+            personaje.columna+=1;
+        } else{
+            personaje.fila = 6;
+            personaje.columna-=1;
+        }
+    }
+    
+
+    if (personaje.columna < 0 && personaje.columna!=0) { 
+        personaje.vision='s';
+        if (personaje.fila%2==0){
+            personaje.columna = 0;
+            personaje.fila-=1;
+        } else{
+            personaje.columna = 0;
+            personaje.fila+=1;
+        }
+    }
+
+    if (personaje.columna >= COLUMNAS && personaje.columna!=6){
+        personaje.vision='w';
+        if (personaje.fila%2==0){
+            personaje.columna = 6;
+            personaje.fila+=1;
+        } else{
+            personaje.columna = 6;
+            personaje.fila-=1;
+        }
+    }
+    
+
+    if (personaje.columna==0 && personaje.fila<0 || personaje.fila==0 && personaje.columna<0){
+        //toca hacer 2 ifs porque personaje.vision=''; cambia 
+        personaje.fila = 0;
+        personaje.columna = 0;
+    }
+
+    if (personaje.columna==6 && personaje.fila>6 || personaje.fila==6 && personaje.columna>6){
+        //toca hacer 2 ifs porque personaje.vision=''; cambia 
+        personaje.fila = 6;
+        personaje.columna = 6;
+    }
+    
+
 }
 
 int main() {
@@ -81,11 +179,12 @@ int main() {
     Tablero tablero;
     Personaje personaje;
 
-    // Inicializar el tablero y el personaje
+    // Inicializar el tablero y Assam
     inicializarTablero(tablero);
     personaje.fila = FILAS / 2;
     personaje.columna = COLUMNAS / 2;
-    personaje.icono = 'H'; // Por ejemplo, 'P' para el personaje
+    personaje.icono = 'H'; // Por ejemplo, 'H' para Assam
+    personaje.vision = 'N'; // Establecer la dirección de visión de Assam al norte
 
     char lanzarDado;
     bool salir = false;
@@ -94,11 +193,11 @@ int main() {
     while (!salir) {
         
         limpiarTerminal(); // Limpiar la terminal antes de mostrar el tablero
-        // Mostrar el tablero con el personaje
+        // Mostrar el tablero con Assam
         mostrarTableroConPersonaje(tablero, personaje);
 
         // Solicitar al usuario que lance el dado
-        cout << "Presiona 'L' para lanzar el dado (o 'Q' para salir): ";
+        cout << "Presiona 'L' para lanzar el dado: ";
         cin >> lanzarDado;
 
         if (lanzarDado == 'Q' || lanzarDado == 'q') {
@@ -110,12 +209,13 @@ int main() {
             char direccion;
             cin >> direccion;
 
-            // Mover al personaje en la dirección dada
-            moverPersonaje(personaje, direccion, movimientos);
+            // Mover al personaje en la dirección dada, excluyendo caminar hacia atrás
+            moverPersonaje(personaje, direccion, movimientos, personaje.vision);
         } else {
-            cout << "Entrada no válida. Presiona 'L' para lanzar el dado o 'Q' para salir." << endl;
+            cout << "Entrada no válida. Presiona 'L' para lanzar ." << endl;
         }
     }
 
     return 0;
-}
+} /*arreglar bugs y continuidad, no despliega varios cout, ya que limpia la terminal muy rapido. cuando la direccion no es valida lanza de nuevo el dado lo cual no deberia ser posible*/
+
