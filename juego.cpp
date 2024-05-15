@@ -25,11 +25,11 @@ struct Alfombra {
     char propietario; // Por ejemplo, '1' para jugador 1 y '2' para jugador 2
 };
 
-/*struct Jugador {
+struct Jugador {
     string nombre;
-    vector<Alfombra> alfombras;
+    Alfombra alfombras[8];
     int monedasTotales;
-};*/
+};
 
 
 // Función para limpiar la terminal en Linux
@@ -45,8 +45,17 @@ void inicializarTablero(Tablero &tablero) {
     }
 }
 
+void mostrarTurno(bool &a, Jugador jugadores[]){
+    if(a==false){
+        cout<<"Turno del jugador "<<jugadores[0].nombre<<":"<<endl<<endl;
+    }else{
+        cout<<"Turno del jugador "<<jugadores[1].nombre<<":"<<endl<<endl;
+    }
+}
+
 // Función para mostrar el tablero con assam
-void mostrarTableroConPersonaje(const Tablero &tablero, const Personaje &personaje) {
+void mostrarTableroConPersonaje(const Tablero &tablero, const Personaje &personaje, bool &a, Jugador jugadores[]) {
+    mostrarTurno(a, jugadores);
     for (int i = 0; i < FILAS; ++i) {
         for (int j = 0; j < COLUMNAS; ++j) {
             if (i == personaje.fila && j == personaje.columna) {
@@ -54,16 +63,16 @@ void mostrarTableroConPersonaje(const Tablero &tablero, const Personaje &persona
                 // Mostrar la dirección en la que Assam está mirando
                 switch (personaje.vision) {
                     case 'w':
-                        cout << " ^ ";
+                        cout <<" "<<personaje.icono << "^";
                         break;
                     case 's':
-                        cout << " v ";
+                        cout << " v"<<personaje.icono;
                         break;
                     case 'd':
-                        cout << " > ";
+                        cout <<personaje.icono << "> ";
                         break;
                     case 'a':
-                        cout << " < ";
+                        cout << " <"<<personaje.icono;
                         break;
                     default:
                         cout << " ? "; // Mostrar un carácter '?' si la dirección es desconocida
@@ -115,8 +124,10 @@ void visionPersonaje(char &vision) {
 
         if (direccionOpuesta == nuevaVision) {
             cout << "Assam no puede mirar hacia atrás" << endl;
-        } else if (direccionOpuesta != 'z' ) {
+        } else if ((nuevaVision == 'w' || nuevaVision == 's')||(nuevaVision == 'a' || nuevaVision == 'd') ) {
             flag = true;
+        } else{
+            cout << "Direccion no valida" << endl;
         }
     } while (!flag);
 
@@ -228,11 +239,41 @@ void moverPersonaje(Personaje &personaje, int movimientos, char &vision) {
 
 }
 
+void pedirJugadores(Jugador jugadores[]) {
+    for (int i = 0; i < 2; i++) {
+        cout << "Ingrese el nombre del jugador #" << (i + 1) << ": ";
+        cin >> jugadores[i].nombre;
+        jugadores[i].monedasTotales = 8; // Asignar 8 monedas a cada jugador
+    }    
+}
+
+void solicitarLanzarDado(Personaje &personaje) {
+    char lanzarDado;
+    bool a=false;
+    do{
+    cout << "Presiona 'L' para lanzar el dado: ";
+    cin >> lanzarDado;
+
+    if (lanzarDado == 'L' || lanzarDado == 'l') {
+        int movimientos = rand() % 6 + 1; // Lanzar el dado (número aleatorio entre 1 y 6)
+        cout << "Has lanzado un " << movimientos << ". " << endl;
+        // Poner tiempo para visualizar el tablero y ver cuando se mueve y cuanto
+        moverPersonaje(personaje, movimientos, personaje.vision);
+        a=!a;
+    } else {
+        cout << "Entrada no válida. Presiona 'L' para lanzar." << endl;
+    }
+    }while(a==false);
+    
+}
+
 int main() {
     srand(time(0)); // Inicializar la semilla del generador de números aleatorios
 
     Tablero tablero;
     Personaje personaje;
+    Jugador jugadores[2];
+    bool turno;
 
     // Inicializar el tablero y Assam
     inicializarTablero(tablero);
@@ -244,30 +285,18 @@ int main() {
     char lanzarDado;
     bool salir = false;
     char direccion;
-
+    pedirJugadores(jugadores);
     // Bucle principal para permitir que el usuario se mueva por el tablero
     while (!salir) {
         
         limpiarTerminal(); // Limpiar la terminal antes de mostrar el tablero
         // Mostrar el tablero con Assam
-        mostrarTableroConPersonaje(tablero, personaje);
+        mostrarTableroConPersonaje(tablero, personaje, turno, jugadores);
         visionPersonaje(personaje.vision);
         limpiarTerminal();
-        mostrarTableroConPersonaje(tablero,personaje);
-        // Solicitar al usuario que lance el dado
-        cout << "Presiona 'L' para lanzar el dado: ";
-        cin >> lanzarDado;
-        if (lanzarDado == 'Q' || lanzarDado == 'q') {
-            salir = true;
-        } else if (lanzarDado == 'L' || lanzarDado == 'l') {
-            int movimientos = rand() % 6 + 1; // Lanzar el dado (número aleatorio entre 1 y 6)
-            cout << "Has lanzado un " << movimientos << ". "<<endl;
-             /*poner tiempo para visualizar el tablero y ver cuando me muevo y cuanto*/
-            // Mover al personaje en la dirección dada, excluyendo caminar hacia atrás
-            moverPersonaje(personaje, movimientos, personaje.vision); /*poner tiempo para visualizar el tablero y ver cuando me muevo y cuanto*/
-        } else {
-            cout << "Entrada no válida. Presiona 'L' para lanzar ." << endl;
-        }
+        mostrarTableroConPersonaje(tablero,personaje, turno, jugadores);
+        solicitarLanzarDado(personaje);
+        turno = !turno;
     }
 
     return 0;
