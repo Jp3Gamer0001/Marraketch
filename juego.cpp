@@ -5,6 +5,7 @@ using namespace std;
 
 const int FILAS = 7;
 const int COLUMNAS = 7;
+const int NUM_ALFOMBRAS = 13;
 
 // Definición de una estructura para representar el tablero
 struct Tablero {
@@ -22,15 +23,16 @@ struct Personaje {
 struct Alfombra {
     int fila;
     int columna;
-    char propietario; // Por ejemplo, '1' para jugador 1 y '2' para jugador 2
+    char orientacion; // 'h' para horizontal, 'v' para vertical
+    bool colocada;
 };
 
 struct Jugador {
     string nombre;
-    Alfombra alfombras[8];
     int monedasTotales;
+    int alfombrasRestantes;
+    Alfombra alfombras[NUM_ALFOMBRAS]; // Cada jugador tiene 13 alfombras
 };
-
 
 // Función para limpiar la terminal en Linux
 void limpiarTerminal() {
@@ -38,9 +40,9 @@ void limpiarTerminal() {
 }
 
 void inicializarTablero(Tablero &tablero) {
-    for (int i = 0; i < FILAS; ++i) {   
+    for (int i = 0; i < FILAS; ++i) {
         for (int j = 0; j < COLUMNAS; ++j) {
-                tablero.casillas[i][j] = 'O'; 
+            tablero.casillas[i][j] = 'O';
         }
     }
 }
@@ -53,7 +55,7 @@ void mostrarTurno(bool &a, Jugador jugadores[]){
     }
 }
 
-// Función para mostrar el tablero con assam
+// Función para mostrar el tablero con Assam
 void mostrarTableroConPersonaje(const Tablero &tablero, const Personaje &personaje, bool &a, Jugador jugadores[]) {
     mostrarTurno(a, jugadores);
     for (int i = 0; i < FILAS; ++i) {
@@ -79,6 +81,8 @@ void mostrarTableroConPersonaje(const Tablero &tablero, const Personaje &persona
                         break;
                 }
                 cout << "]";
+            } else if ( (i == 'p' || i == 's') || (j == 'p' || j == 's') ){
+                cout << "[ # ]";
             } else {
                 cout << "[ " << tablero.casillas[i][j] << " ]"; // Mostrar la casilla del tablero
             }
@@ -86,8 +90,6 @@ void mostrarTableroConPersonaje(const Tablero &tablero, const Personaje &persona
         cout << endl;
     }
 }
-
-
 
 char validarDireccionOpuesta(char vision) {
     char direccionOpuesta;
@@ -107,8 +109,7 @@ char validarDireccionOpuesta(char vision) {
         default:
             cout << "Error: Visión no válida." << endl;
             direccionOpuesta = 'z';
-                }
-
+    }
     return direccionOpuesta;
 }
 
@@ -124,7 +125,7 @@ void visionPersonaje(char &vision) {
 
         if (direccionOpuesta == nuevaVision) {
             cout << "Assam no puede mirar hacia atrás" << endl;
-        } else if ((nuevaVision == 'w' || nuevaVision == 's')||(nuevaVision == 'a' || nuevaVision == 'd') ) {
+        } else if ((nuevaVision == 'w' || nuevaVision == 's') || (nuevaVision == 'a' || nuevaVision == 'd') ) {
             flag = true;
         } else{
             cout << "Direccion no valida" << endl;
@@ -132,111 +133,100 @@ void visionPersonaje(char &vision) {
     } while (!flag);
 
     vision = nuevaVision; // Actualizar la visión con la nueva dirección válida
-
 }
-
 
 // Función para mover al personaje en una dirección dada
 void moverPersonaje(Personaje &personaje, int movimientos, char &vision) {
+    // Mover al personaje en la dirección dada
+    switch (vision) {
+        case 'W':
+        case 'w':
+            personaje.fila -= movimientos;
+            break;
+        case 'A':
+        case 'a':
+            personaje.columna -= movimientos;
+            break;
+        case 'S':
+        case 's':
+            personaje.fila += movimientos;
+            break;
+        case 'D':
+        case 'd':
+            personaje.columna += movimientos;
+            break;
+        default:
+            cout << "Dirección no válida. Assam no se ha movido." << endl;
+    }
 
-            // Mover al personaje en la dirección dada
-            switch (vision) {
-                case 'W':
-                case 'w':
-                    personaje.fila -= movimientos;
-                    break;
-                case 'A':
-                case 'a':
-                    personaje.columna -= movimientos;
-                    break;
-                case 'S':
-                case 's':
-                    personaje.fila += movimientos;
-                    break;
-                case 'D':
-                case 'd':
-                    personaje.columna += movimientos;
-                    break;
-                default:
-                    cout << "Dirección no válida. Assam no se ha movido." << endl;
-            }
-
-    /* Comentario futuro: al hacer esto peremos los movimientos extra que hemos hecho, esto quiere decir que si assam se sale de la matriz y gira, este pierde todos los movimientos extra que halla hecho. Para solventar esto podemos restar la diferencia de le saca al tablero para calcular cuanto debe andar en la direccion "vision" que se implementara a assam */
-
-    // mover atravez del tablero a assam
-    if (personaje.fila < 0 && personaje.fila!=0){ 
-        vision='s';
-        if (personaje.columna%2==0){
+    // Mover a través del tablero a Assam
+    if (personaje.fila < 0 && personaje.fila != 0) {
+        vision = 's';
+        if (personaje.columna % 2 == 0) {
             personaje.fila = 0;
-            personaje.columna-=1;
-        } else{
+            personaje.columna -= 1;
+        } else {
             personaje.fila = 0;
-            personaje.columna+=1;
+            personaje.columna += 1;
         }
     }
 
-    if (personaje.fila >= FILAS && personaje.fila!=6){
-        vision='w';
-        if (personaje.columna%2==0){
+    if (personaje.fila >= FILAS && personaje.fila != 6) {
+        vision = 'w';
+        if (personaje.columna % 2 == 0) {
             personaje.fila = 6;
-            personaje.columna+=1;
-        } else{
+            personaje.columna += 1;
+        } else {
             personaje.fila = 6;
-            personaje.columna-=1;
+            personaje.columna -= 1;
         }
     }
-    
 
-    if (personaje.columna < 0 && personaje.columna!=0) { 
-        vision='d';
-        if (personaje.fila%2==0){
+    if (personaje.columna < 0 && personaje.columna != 0) {
+        vision = 'd';
+        if (personaje.fila % 2 == 0) {
             personaje.columna = 0;
-            personaje.fila-=1;
-        } else{
+            personaje.fila -= 1;
+        } else {
             personaje.columna = 0;
-            personaje.fila+=1;
+            personaje.fila += 1;
         }
     }
 
-    if (personaje.columna >= COLUMNAS && personaje.columna!=6){
-        vision='a';
-        if (personaje.fila%2==0){
+    if (personaje.columna >= COLUMNAS && personaje.columna != 6) {
+        vision = 'a';
+        if (personaje.fila % 2 == 0) {
             personaje.columna = 6;
-            personaje.fila+=1;
-        } else{
+            personaje.fila += 1;
+        } else {
             personaje.columna = 6;
-            personaje.fila-=1;
+            personaje.fila -= 1;
         }
     }
-    
 
-    if (personaje.columna==0 && personaje.fila<0){
-        vision='d';
+    if (personaje.columna == 0 && personaje.fila < 0) {
+        vision = 'd';
         personaje.fila = 0;
         personaje.columna = 0;
     }
 
-    if (personaje.fila==0 && personaje.columna<0){
-        vision='s';
+    if (personaje.fila == 0 && personaje.columna < 0) {
+        vision = 's';
         personaje.fila = 0;
         personaje.columna = 0;
     }
-    
-    if (personaje.columna==6 && personaje.fila>6){
-        vision='w';
+
+    if (personaje.columna == 6 && personaje.fila > 6) {
+        vision = 'w';
         personaje.fila = 6;
         personaje.columna = 6;
     }
 
-    /*Falta revisar esto, no se cumple en todos los casos*/
-
-    if (personaje.fila==6 && personaje.columna>6){
-        vision='a';
+    if (personaje.fila == 6 && personaje.columna > 6) {
+        vision = 'a';
         personaje.fila = 6;
         personaje.columna = 6;
     }
-    
-
 }
 
 void pedirJugadores(Jugador jugadores[]) {
@@ -244,27 +234,131 @@ void pedirJugadores(Jugador jugadores[]) {
         cout << "Ingrese el nombre del jugador #" << (i + 1) << ": ";
         cin >> jugadores[i].nombre;
         jugadores[i].monedasTotales = 8; // Asignar 8 monedas a cada jugador
-    }    
+        jugadores[i].alfombrasRestantes = NUM_ALFOMBRAS;
+
+        // Inicializar las alfombras del jugador
+        for (int j = 0; j < NUM_ALFOMBRAS; ++j) {
+            jugadores[i].alfombras[j].colocada = false;
+        }
+    }
 }
 
 void solicitarLanzarDado(Personaje &personaje) {
     char lanzarDado;
-    bool a=false;
-    do{
-    cout << "Presiona 'L' para lanzar el dado: ";
-    cin >> lanzarDado;
+    bool a = false;
+    do {
+        cout << "Presiona 'L' para lanzar el dado: ";
+        cin >> lanzarDado;
 
-    if (lanzarDado == 'L' || lanzarDado == 'l') {
-        int movimientos = rand() % 6 + 1; // Lanzar el dado (número aleatorio entre 1 y 6)
-        cout << "Has lanzado un " << movimientos << ". " << endl;
-        // Poner tiempo para visualizar el tablero y ver cuando se mueve y cuanto
-        moverPersonaje(personaje, movimientos, personaje.vision);
-        a=!a;
-    } else {
-        cout << "Entrada no válida. Presiona 'L' para lanzar." << endl;
+        if (lanzarDado == 'L' || lanzarDado == 'l') {
+            int movimientos = rand() % 6 + 1; // Lanzar el dado (número aleatorio entre 1 y 6)
+            cout << "Has lanzado un " << movimientos << ". " << endl;
+            // Poner tiempo para visualizar el tablero y ver cuando se mueve y cuanto
+            moverPersonaje(personaje, movimientos, personaje.vision);
+            a = !a;
+        } else {
+            cout << "Entrada no válida. Presiona 'L' para lanzar." << endl;
+        }
+    } while (a == false);
+}
+
+// Función para poner una alfombra en el tablero
+bool ponerAlfombra(Tablero &tablero, Alfombra alfombra, char jugador) {
+    int fila = alfombra.fila;
+    int columna = alfombra.columna;
+    char orientacion = alfombra.orientacion;
+
+    // Verificar si la posición está dentro del tablero
+    if (fila < 0 || columna < 0 || fila >= FILAS || columna >= COLUMNAS) {
+        cout << "Posición fuera del tablero." << endl;
+        return false;
     }
-    }while(a==false);
-    
+
+    if (orientacion == 'h') { // Orientación horizontal
+        if (columna + 1 >= COLUMNAS) {
+            cout << "No se puede colocar la alfombra en esta posición." << endl;
+            return false;
+        }
+        tablero.casillas[fila][columna] = jugador;
+        tablero.casillas[fila][columna + 1] = jugador;
+    } else if (orientacion == 'v') { // Orientación vertical
+        if (fila + 1 >= FILAS) {
+            cout << "No se puede colocar la alfombra en esta posición." << endl;
+            return false;
+        }
+        tablero.casillas[fila][columna] = jugador;
+        tablero.casillas[fila + 1][columna] = jugador;
+    } else {
+        cout << "Orientación no válida." << endl;
+        return false;
+    }
+
+    return true;
+}
+
+// Función para colocar una alfombra en los lugares adyacentes al personaje
+void colocarAlfombra(Tablero &tablero, Jugador &jugador, const Personaje &personaje) {
+    if (jugador.alfombrasRestantes == 0) {
+        cout << "No tienes alfombras disponibles." << endl;
+        return;
+    }
+
+    char orientacion;
+    int fila, columna;
+    int alfombraDisponible = -1; // Índice de la primera alfombra disponible
+
+    do {
+        cout << "Ingrese la fila donde desea colocar la alfombra (0-6): ";
+        cin >> fila;
+        cout << "Ingrese la columna donde desea colocar la alfombra (0-6): ";
+        cin >> columna;
+
+        if (fila < 0 || fila >= FILAS || columna < 0 || columna >= COLUMNAS) {
+            cout << "Posición fuera del tablero. Inténtalo de nuevo." << endl;
+            continue;
+        }
+
+        // Verificar si la posición está adyacente al personaje
+        if ((abs(fila - personaje.fila) > 1) || (abs(columna - personaje.columna) > 1)) {
+            cout << "La alfombra solo se puede colocar en las casillas adyacentes al personaje. Inténtalo de nuevo." << endl;
+            continue;
+        }
+
+        cout << "En qué dirección deseas colocar la alfombra (h: horizontal, v: vertical): ";
+        cin >> orientacion;
+
+        if (orientacion != 'h' && orientacion != 'v') {
+            cout << "Orientación no válida. Inténtalo de nuevo." << endl;
+            continue;
+        }
+
+        // Buscamos una alfombra disponible
+        for (int i = 0; i < NUM_ALFOMBRAS; ++i) {
+            if (!jugador.alfombras[i].colocada) {
+                alfombraDisponible = i;
+                break;
+            }
+        }
+
+        if (alfombraDisponible == -1) {
+            cout << "No tienes alfombras disponibles." << endl;
+            return;
+        }
+
+        // Colocamos la alfombra en la posición deseada
+        jugador.alfombras[alfombraDisponible].fila = fila;
+        jugador.alfombras[alfombraDisponible].columna = columna;
+        jugador.alfombras[alfombraDisponible].orientacion = orientacion;
+
+        if (ponerAlfombra(tablero, jugador.alfombras[alfombraDisponible], jugador.nombre[0])) {
+            jugador.alfombras[alfombraDisponible].colocada = true;
+            jugador.alfombrasRestantes--;
+            cout << "Alfombra colocada correctamente. Alfombras restantes: " << jugador.alfombrasRestantes << endl;
+            return; // Salir del bucle
+        } else {
+            cout << "Error al colocar la alfombra. Inténtalo de nuevo." << endl;
+        }
+    } while (true);
 }
 
 int main() {
@@ -273,7 +367,7 @@ int main() {
     Tablero tablero;
     Personaje personaje;
     Jugador jugadores[2];
-    bool turno;
+    bool turno = false;
 
     // Inicializar el tablero y Assam
     inicializarTablero(tablero);
@@ -282,23 +376,27 @@ int main() {
     personaje.icono = 'H'; // Por ejemplo, 'H' para Assam
     personaje.vision = 'w'; // Establecer la dirección de visión de Assam al norte
 
-    char lanzarDado;
-    bool salir = false;
-    char direccion;
     pedirJugadores(jugadores);
+
     // Bucle principal para permitir que el usuario se mueva por el tablero
-    while (!salir) {
-        
+    while (true) {
         limpiarTerminal(); // Limpiar la terminal antes de mostrar el tablero
-        // Mostrar el tablero con Assam
-        mostrarTableroConPersonaje(tablero, personaje, turno, jugadores);
+        mostrarTableroConPersonaje(tablero, personaje, turno, jugadores); // Mostrar el tablero con Assam
+
         visionPersonaje(personaje.vision);
+
         limpiarTerminal();
-        mostrarTableroConPersonaje(tablero,personaje, turno, jugadores);
+        mostrarTableroConPersonaje(tablero, personaje, turno, jugadores);
+
         solicitarLanzarDado(personaje);
-        turno = !turno;
+
+        limpiarTerminal();
+        mostrarTableroConPersonaje(tablero, personaje, turno, jugadores);
+
+        colocarAlfombra(tablero, jugadores[turno ? 1 : 0], personaje);
+
+        turno = !turno; // Cambiar de turno
     }
 
     return 0;
-} /*arreglar bugs, no despliega varios cout, ya que limpia la terminal muy rapido. Ademas el juego solo permite que assam se mueva en linea recta, toca hacer otra funcion para que assam mire y revisar el codigo*/
-
+}
