@@ -6,7 +6,7 @@ using namespace std;
 
 const int FILAS = 7;
 const int COLUMNAS = 7;
-const int NUM_ALFOMBRAS = 13;
+const int NUM_ALFOMBRAS = 2;
 
 // Definición de una estructura para representar el tablero
 struct Tablero {
@@ -32,7 +32,7 @@ struct Jugador {
     string nombre;
     int monedasTotales;
     int alfombrasRestantes;
-    Alfombra alfombras[NUM_ALFOMBRAS]; // Cada jugador tiene 13 alfombras
+    Alfombra alfombras[NUM_ALFOMBRAS]; 
 };
 
 // Función para limpiar la terminal en Linux
@@ -60,7 +60,7 @@ void mostrarTurno(bool &a, Jugador jugadores[]){
 void mostrarTableroConPersonaje(const Tablero &tablero, const Personaje &personaje, bool &a, Jugador jugadores[]) {
     mostrarTurno(a, jugadores);
 
-     // Mostrar monedas de cada jugador
+    // Mostrar monedas de cada jugador
     cout << "Monedas del jugador " << jugadores[0].nombre << ": " << jugadores[0].monedasTotales << endl;
     cout << "Monedas del jugador " << jugadores[1].nombre << ": " << jugadores[1].monedasTotales << endl;
 
@@ -96,7 +96,14 @@ void mostrarTableroConPersonaje(const Tablero &tablero, const Personaje &persona
                 }
                 cout << "]";
             } else {
+                // Mostrar las casillas del tablero
+                if (tablero.casillas[i][j] == jugadores[0].nombre[0]) {
+                    cout << "\033[1;33m"; // Cambiar color a verde (alfombras del jugador 1)
+                } else if (tablero.casillas[i][j] == jugadores[1].nombre[0]) {
+                    cout << "\033[1;34m"; // Cambiar color a azul (alfombras del jugador 2)
+                }
                 cout << "[ " << tablero.casillas[i][j] << " ]"; // Mostrar la casilla del tablero
+                cout << "\033[0m"; // Restaurar color por defecto
             }
         }
         cout << endl;
@@ -149,95 +156,69 @@ void visionPersonaje(char &vision) {
 
 // Función para mover al personaje en una dirección dada
 void moverPersonaje(Personaje &personaje, int movimientos, char &vision) {
-    // Mover al personaje en la dirección dada
-    switch (vision) {
-        case 'W':
-        case 'w':
-            personaje.fila -= movimientos;
-            break;
-        case 'A':
-        case 'a':
-            personaje.columna -= movimientos;
-            break;
-        case 'S':
-        case 's':
-            personaje.fila += movimientos;
-            break;
-        case 'D':
-        case 'd':
-            personaje.columna += movimientos;
-            break;
-        default:
-            cout << "Dirección no válida. Assam no se ha movido." << endl;
-    }
+    while (movimientos > 0) {
+        // Mover al personaje en la dirección dada
+        switch (vision) {
+            case 'W':
+            case 'w':
+                personaje.fila -= 1;
+                break;
+            case 'A':
+            case 'a':
+                personaje.columna -= 1;
+                break;
+            case 'S':
+            case 's':
+                personaje.fila += 1;
+                break;
+            case 'D':
+            case 'd':
+                personaje.columna += 1;
+                break;
+            default:
+                cout << "Dirección no válida. Assam no se ha movido." << endl;
+                return;
+        }
+        movimientos--;
 
-    // Mover a través del tablero a Assam
-    if (personaje.fila < 0 && personaje.fila != 0) {
-        vision = 's';
-        if (personaje.columna % 2 == 0) {
+        if (personaje.fila == 0 && personaje.columna < 0) {
+            vision = 's';
             personaje.fila = 0;
-            personaje.columna -= 1;
-        } else {
+            personaje.columna = 0;
+        } else if (personaje.fila < 0 && personaje.columna == 0) {
+            vision = 'd';
             personaje.fila = 0;
-            personaje.columna += 1;
-        }
-    }
-
-    if (personaje.fila >= FILAS && personaje.fila != 6) {
-        vision = 'w';
-        if (personaje.columna % 2 == 0) {
-            personaje.fila = 6;
-            personaje.columna += 1;
-        } else {
-            personaje.fila = 6;
-            personaje.columna -= 1;
-        }
-    }
-
-    if (personaje.columna < 0 && personaje.columna != 0) {
-        vision = 'd';
-        if (personaje.fila % 2 == 0) {
             personaje.columna = 0;
-            personaje.fila -= 1;
-        } else {
+        } else if (personaje.fila == FILAS - 1 && personaje.columna >= COLUMNAS) {
+            vision = 'w';
+            personaje.fila = FILAS - 1;
+            personaje.columna = COLUMNAS - 1;
+        } else if (personaje.fila >= FILAS && personaje.columna == COLUMNAS - 1) {
+            vision = 'a';
+            personaje.fila = FILAS - 1;
+            personaje.columna = COLUMNAS - 1;
+        }
+
+        // Ajustar la dirección si el personaje se sale del tablero
+        if (personaje.fila < 0) {
+            vision = 's';
+            personaje.fila = 0;
+            personaje.columna = (personaje.columna % 2 == 0) ? personaje.columna - 1 : personaje.columna + 1;
+        } else if (personaje.fila >= FILAS) {
+            vision = 'w';
+            personaje.fila = FILAS - 1;
+            personaje.columna = (personaje.columna % 2 == 0) ? personaje.columna + 1 : personaje.columna - 1;
+        } else if (personaje.columna < 0) {
+            vision = 'd';
             personaje.columna = 0;
-            personaje.fila += 1;
+            personaje.fila = (personaje.fila % 2 == 0) ? personaje.fila - 1 : personaje.fila + 1;
+        } else if (personaje.columna >= COLUMNAS) {
+            vision = 'a';
+            personaje.columna = COLUMNAS - 1;
+            personaje.fila = (personaje.fila % 2 == 0) ? personaje.fila + 1 : personaje.fila - 1;
         }
-    }
 
-    if (personaje.columna >= COLUMNAS && personaje.columna != 6) {
-        vision = 'a';
-        if (personaje.fila % 2 == 0) {
-            personaje.columna = 6;
-            personaje.fila += 1;
-        } else {
-            personaje.columna = 6;
-            personaje.fila -= 1;
-        }
-    }
 
-    if (personaje.columna == 0 && personaje.fila < 0) {
-        vision = 'd';
-        personaje.fila = 0;
-        personaje.columna = 0;
-    }
-
-    if (personaje.fila == 0 && personaje.columna < 0) {
-        vision = 's';
-        personaje.fila = 0;
-        personaje.columna = 0;
-    }
-
-    if (personaje.columna == 6 && personaje.fila > 6) {
-        vision = 'w';
-        personaje.fila = 6;
-        personaje.columna = 6;
-    }
-
-    if (personaje.fila == 6 && personaje.columna > 6) {
-        vision = 'a';
-        personaje.fila = 6;
-        personaje.columna = 6;
     }
 }
 
@@ -432,27 +413,35 @@ int main() {
 
     // Bucle principal para permitir que el usuario se mueva por el tablero
     while (true) {
-        limpiarTerminal(); // Limpiar la terminal antes de mostrar el tablero
-        mostrarTableroConPersonaje(tablero, personaje, turno, jugadores); // Mostrar el tablero con Assam
+    limpiarTerminal(); // Limpiar la terminal antes de mostrar el tablero
+    mostrarTableroConPersonaje(tablero, personaje, turno, jugadores); // Mostrar el tablero con Assam
 
-        visionPersonaje(personaje.vision);
+    visionPersonaje(personaje.vision);
 
-        limpiarTerminal();
-        mostrarTableroConPersonaje(tablero, personaje, turno, jugadores);
+    limpiarTerminal();
+    mostrarTableroConPersonaje(tablero, personaje, turno, jugadores);
 
-        solicitarLanzarDado(personaje);
+    solicitarLanzarDado(personaje);
 
-        limpiarTerminal();
-        mostrarTableroConPersonaje(tablero, personaje, turno, jugadores);
+    limpiarTerminal();
+    mostrarTableroConPersonaje(tablero, personaje, turno, jugadores);
 
-        colocarAlfombra(tablero, jugadores[turno ? 1 : 0], personaje);
+    colocarAlfombra(tablero, jugadores[turno ? 1 : 0], personaje);
 
-        int posx = personaje.fila;
-        int posy = personaje.columna;
-        pagarAOponente(tablero, jugadores[turno ? 1 : 0], jugadores[turno ? 0 : 1], posx, posy);
-
-        turno = !turno; // Cambiar de turno
+    int posx = personaje.fila;
+    int posy = personaje.columna;
+    if (!pagarAOponente(tablero, jugadores[turno ? 1 : 0], jugadores[turno ? 0 : 1], posx, posy)) {
+        break; // Si un jugador no tiene suficientes monedas para pagar, terminar el juego
     }
+
+    // Verificar si ambos jugadores ya no tienen alfombras disponibles
+    if (jugadores[0].alfombrasRestantes == 0 && jugadores[1].alfombrasRestantes == 0) {
+        break; // Si ambos jugadores no tienen alfombras disponibles, terminar el juego
+    }
+
+    turno = !turno; // Cambiar de turno
+}
+
 
     return 0;
 }
