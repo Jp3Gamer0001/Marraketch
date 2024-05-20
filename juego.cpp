@@ -40,7 +40,7 @@ struct Jugador {
 
 // Función para limpiar la terminal en Linux
 void limpiarTerminal() {
-    system("clear"); // Ejecutar el comando clear en la terminal
+    system("cls"); // Ejecutar el comando clear en la terminal
 }
 
 void inicializarTablero(Tablero &tablero) {
@@ -156,7 +156,6 @@ void visionPersonaje(char &vision) {
 
     vision = nuevaVision; // Actualizar la visión con la nueva dirección válida
 }
-
 
 // Función para mover al personaje en una dirección dada
 void moverPersonaje(Personaje &personaje, int movimientos, char &vision) {
