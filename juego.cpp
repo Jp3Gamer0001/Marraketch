@@ -1,6 +1,7 @@
 #include <iostream>
 #include <cstdlib> // Para la función rand() y srand()
 #include <ctime>   // Para la función time()
+#include <cmath> 
 using namespace std;
 
 const int FILAS = 7;
@@ -58,7 +59,20 @@ void mostrarTurno(bool &a, Jugador jugadores[]){
 // Función para mostrar el tablero con Assam
 void mostrarTableroConPersonaje(const Tablero &tablero, const Personaje &personaje, bool &a, Jugador jugadores[]) {
     mostrarTurno(a, jugadores);
+
+     // Mostrar monedas de cada jugador
+    cout << "Monedas del jugador " << jugadores[0].nombre << ": " << jugadores[0].monedasTotales << endl;
+    cout << "Monedas del jugador " << jugadores[1].nombre << ": " << jugadores[1].monedasTotales << endl;
+
+    // Mostrar números de columnas
+    cout << "    "; // Espacio para el número de filas
+    for (int j = 0; j < COLUMNAS; ++j) {
+        cout << "  " << j << "  ";
+    }
+    cout << endl;
+
     for (int i = 0; i < FILAS; ++i) {
+        cout << " " << i << " "; // Mostrar el número de fila
         for (int j = 0; j < COLUMNAS; ++j) {
             if (i == personaje.fila && j == personaje.columna) {
                 cout << "[" ;
@@ -81,8 +95,6 @@ void mostrarTableroConPersonaje(const Tablero &tablero, const Personaje &persona
                         break;
                 }
                 cout << "]";
-            } else if ( (i == 'p' || i == 's') || (j == 'p' || j == 's') ){
-                cout << "[ # ]";
             } else {
                 cout << "[ " << tablero.casillas[i][j] << " ]"; // Mostrar la casilla del tablero
             }
@@ -233,7 +245,7 @@ void pedirJugadores(Jugador jugadores[]) {
     for (int i = 0; i < 2; i++) {
         cout << "Ingrese el nombre del jugador #" << (i + 1) << ": ";
         cin >> jugadores[i].nombre;
-        jugadores[i].monedasTotales = 8; // Asignar 8 monedas a cada jugador
+        jugadores[i].monedasTotales = 20; // Asignar 20 monedas a cada jugador
         jugadores[i].alfombrasRestantes = NUM_ALFOMBRAS;
 
         // Inicializar las alfombras del jugador
@@ -261,6 +273,46 @@ void solicitarLanzarDado(Personaje &personaje) {
         }
     } while (a == false);
 }
+
+bool pagarAOponente(Tablero& tablero, Jugador& jugadorActual, Jugador& oponente, int posx, int posy) {
+    int costoTotal = 0;
+    char simboloOponente = oponente.nombre[0];
+
+    // Verificar si Assam está parado sobre una alfombra del oponente
+    if (tablero.casillas[posx][posy] == simboloOponente) {
+        costoTotal += 1;
+
+        // Verificar alfombras adyacentes
+        if (posx > 0 && tablero.casillas[posx - 1][posy] == simboloOponente) {
+            costoTotal += 1;
+        }
+        if (posx < FILAS - 1 && tablero.casillas[posx + 1][posy] == simboloOponente) {
+            costoTotal += 1;
+        }
+        if (posy > 0 && tablero.casillas[posx][posy - 1] == simboloOponente) {
+            costoTotal += 1;
+        }
+        if (posy < COLUMNAS - 1 && tablero.casillas[posx][posy + 1] == simboloOponente) {
+            costoTotal += 1;
+        }
+
+        // Realizar el pago
+        if (jugadorActual.monedasTotales >= costoTotal) {
+            jugadorActual.monedasTotales -= costoTotal;
+            oponente.monedasTotales += costoTotal;
+            cout << jugadorActual.nombre << " ha pagado " << costoTotal << " monedas a " << oponente.nombre << "." << endl;
+            return true;
+        } else {
+            oponente.monedasTotales += jugadorActual.monedasTotales;
+            jugadorActual.monedasTotales = 0;
+            cout << jugadorActual.nombre << " no tiene suficientes monedas para pagar. ¡Ha perdido todas sus monedas!" << endl;
+            return false;
+        }
+    }
+
+    return true; // Si no está parado en una alfombra del oponente, no hay pago
+}
+
 
 // Función para poner una alfombra en el tablero
 bool ponerAlfombra(Tablero &tablero, Alfombra alfombra, char jugador) {
@@ -394,6 +446,10 @@ int main() {
         mostrarTableroConPersonaje(tablero, personaje, turno, jugadores);
 
         colocarAlfombra(tablero, jugadores[turno ? 1 : 0], personaje);
+
+        int posx = personaje.fila;
+        int posy = personaje.columna;
+        pagarAOponente(tablero, jugadores[turno ? 1 : 0], jugadores[turno ? 0 : 1], posx, posy);
 
         turno = !turno; // Cambiar de turno
     }
