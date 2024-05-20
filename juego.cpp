@@ -38,7 +38,7 @@ struct Alfombra
 struct Jugador
 {
     string nombre;
-    int monedasTotales;
+    float monedasTotales;
     int alfombrasRestantes;
     Alfombra alfombras[NUM_ALFOMBRAS];
 };
@@ -324,24 +324,24 @@ bool pagarAOponente(Tablero &tablero, Jugador &jugadorActual, Jugador &oponente,
     // Verificar si Assam está parado sobre una alfombra del oponente
     if (tablero.casillas[posx][posy] == simboloOponente)
     {
-        costoTotal += 1;
+        costoTotal += 0.5;
 
         // Verificar alfombras adyacentes
         if (posx > 0 && tablero.casillas[posx - 1][posy] == simboloOponente)
         {
-            costoTotal += 1;
+            costoTotal += 0.5;
         }
         if (posx < FILAS - 1 && tablero.casillas[posx + 1][posy] == simboloOponente)
         {
-            costoTotal += 1;
+            costoTotal += 0.5;
         }
         if (posy > 0 && tablero.casillas[posx][posy - 1] == simboloOponente)
         {
-            costoTotal += 1;
+            costoTotal += 0.5;
         }
         if (posy < COLUMNAS - 1 && tablero.casillas[posx][posy + 1] == simboloOponente)
         {
-            costoTotal += 1;
+            costoTotal += 0.5;
         }
 
         // Realizar el pago
