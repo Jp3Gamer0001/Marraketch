@@ -1,0 +1,3 @@
+Jugador ganador: hola
+Monedas totales: 22
+Alfombras puestas: 2
