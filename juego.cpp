@@ -6,11 +6,14 @@ using namespace std;
 
 const int FILAS = 7;
 const int COLUMNAS = 7;
-const int NUM_ALFOMBRAS = 2;
+const int NUM_ALFOMBRAS = 10;
 
 // Definición de una estructura para representar el tablero
 struct Tablero {
     char casillas[FILAS][COLUMNAS];
+    string color ="\033[1;32m";
+    string colorP1 ="\033[1;33m";
+    string colorP2 ="\033[1;34m";
 };
 
 // Definición de una estructura para representar un personaje
@@ -98,12 +101,12 @@ void mostrarTableroConPersonaje(const Tablero &tablero, const Personaje &persona
             } else {
                 // Mostrar las casillas del tablero
                 if (tablero.casillas[i][j] == jugadores[0].nombre[0]) {
-                    cout << "\033[1;33m"; // Cambiar color a verde (alfombras del jugador 1)
+                    cout << tablero.colorP1; // Cambiar color a amarillo (alfombras del jugador 1)
                 } else if (tablero.casillas[i][j] == jugadores[1].nombre[0]) {
-                    cout << "\033[1;34m"; // Cambiar color a azul (alfombras del jugador 2)
+                    cout << tablero.colorP2; // Cambiar color a azul (alfombras del jugador 2)
                 }
                 cout << "[ " << tablero.casillas[i][j] << " ]"; // Mostrar la casilla del tablero
-                cout << "\033[0m"; // Restaurar color por defecto
+                cout << tablero.color; // Restaurar color por defecto
             }
         }
         cout << endl;
