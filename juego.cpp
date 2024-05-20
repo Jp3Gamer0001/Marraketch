@@ -292,29 +292,42 @@ void pedirJugadores(Jugador jugadores[])
     }
 }
 
-void solicitarLanzarDado(Personaje &personaje)
-{
+int decidirMovimientos(int movimientos) {
+    int movimientosElegidos;
+    while (true) {
+        cout << "Tienes " << movimientos << " movimientos. ¿Cuántos deseas usar? (1-" << movimientos << "): ";
+        cin >> movimientosElegidos;
+
+        if (movimientosElegidos < 1 || movimientosElegidos > movimientos) {
+            cout << "Cantidad de movimientos no válida. Inténtalo de nuevo." << endl;
+        } else {
+            break; // Salir del bucle si la entrada es válida
+        }
+    }
+
+    return movimientosElegidos;
+}
+
+void solicitarLanzarDado(Personaje &personaje) {
     char lanzarDado;
     bool a = false;
-    do
-    {
+    do {
         cout << "Presiona 'L' para lanzar el dado: ";
         cin >> lanzarDado;
 
-        if (lanzarDado == 'L' || lanzarDado == 'l')
-        {
+        if (lanzarDado == 'L' || lanzarDado == 'l') {
             int movimientos = rand() % 6 + 1; // Lanzar el dado (número aleatorio entre 1 y 6)
             cout << "Has lanzado un " << movimientos << ". " << endl;
-            // Poner tiempo para visualizar el tablero y ver cuando se mueve y cuanto
-            moverPersonaje(personaje, movimientos, personaje.vision);
+
+            int movimientosElegidos = decidirMovimientos(movimientos);
+            moverPersonaje(personaje, movimientosElegidos, personaje.vision);
             a = !a;
-        }
-        else
-        {
+        } else {
             cout << "Entrada no válida. Presiona 'L' para lanzar." << endl;
         }
     } while (a == false);
 }
+
 
 bool pagarAOponente(Tablero &tablero, Jugador &jugadorActual, Jugador &oponente, int posx, int posy)
 {
