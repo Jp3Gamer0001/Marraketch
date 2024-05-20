@@ -136,108 +136,74 @@ void visionPersonaje(char &vision) {
 }
 
 
-// Función para mover al personaje en una dirección dada
 void moverPersonaje(Personaje &personaje, int movimientos, char &vision) {
+    while (movimientos > 0) {
+        // Mover al personaje en la dirección dada
+        switch (vision) {
+            case 'W':
+            case 'w':
+                personaje.fila -= 1;
+                break;
+            case 'A':
+            case 'a':
+                personaje.columna -= 1;
+                break;
+            case 'S':
+            case 's':
+                personaje.fila += 1;
+                break;
+            case 'D':
+            case 'd':
+                personaje.columna += 1;
+                break;
+            default:
+                cout << "Dirección no válida. Assam no se ha movido." << endl;
+                return;
+        }
+        movimientos--;
 
-            // Mover al personaje en la dirección dada
-            switch (vision) {
-                case 'W':
-                case 'w':
-                    personaje.fila -= movimientos;
-                    break;
-                case 'A':
-                case 'a':
-                    personaje.columna -= movimientos;
-                    break;
-                case 'S':
-                case 's':
-                    personaje.fila += movimientos;
-                    break;
-                case 'D':
-                case 'd':
-                    personaje.columna += movimientos;
-                    break;
-                default:
-                    cout << "Dirección no válida. Assam no se ha movido." << endl;
-            }
-
-    /* Comentario futuro: al hacer esto peremos los movimientos extra que hemos hecho, esto quiere decir que si assam se sale de la matriz y gira, este pierde todos los movimientos extra que halla hecho. Para solventar esto podemos restar la diferencia de le saca al tablero para calcular cuanto debe andar en la direccion "vision" que se implementara a assam */
-
-    // mover atravez del tablero a assam
-    if (personaje.fila < 0 && personaje.fila!=0){ 
-        vision='s';
-        if (personaje.columna%2==0){
+        if (personaje.fila == 0 && personaje.columna < 0) {
+            vision = 's';
             personaje.fila = 0;
-            personaje.columna-=1;
-        } else{
+            personaje.columna = 0;
+        } else if (personaje.fila < 0 && personaje.columna == 0) {
+            vision = 'd';
             personaje.fila = 0;
-            personaje.columna+=1;
-        }
-    }
-
-    if (personaje.fila >= FILAS && personaje.fila!=6){
-        vision='w';
-        if (personaje.columna%2==0){
-            personaje.fila = 6;
-            personaje.columna+=1;
-        } else{
-            personaje.fila = 6;
-            personaje.columna-=1;
-        }
-    }
-    
-
-    if (personaje.columna < 0 && personaje.columna!=0) { 
-        vision='d';
-        if (personaje.fila%2==0){
             personaje.columna = 0;
-            personaje.fila-=1;
-        } else{
+        } else if (personaje.fila == FILAS - 1 && personaje.columna >= COLUMNAS) {
+            vision = 'w';
+            personaje.fila = FILAS - 1;
+            personaje.columna = COLUMNAS - 1;
+        } else if (personaje.fila >= FILAS && personaje.columna == COLUMNAS - 1) {
+            vision = 'a';
+            personaje.fila = FILAS - 1;
+            personaje.columna = COLUMNAS - 1;
+        }
+
+        // Ajustar la dirección si el personaje se sale del tablero
+        if (personaje.fila < 0) {
+            vision = 's';
+            personaje.fila = 0;
+            personaje.columna = (personaje.columna % 2 == 0) ? personaje.columna - 1 : personaje.columna + 1;
+        } else if (personaje.fila >= FILAS) {
+            vision = 'w';
+            personaje.fila = FILAS - 1;
+            personaje.columna = (personaje.columna % 2 == 0) ? personaje.columna + 1 : personaje.columna - 1;
+        } else if (personaje.columna < 0) {
+            vision = 'd';
             personaje.columna = 0;
-            personaje.fila+=1;
+            personaje.fila = (personaje.fila % 2 == 0) ? personaje.fila - 1 : personaje.fila + 1;
+        } else if (personaje.columna >= COLUMNAS) {
+            vision = 'a';
+            personaje.columna = COLUMNAS - 1;
+            personaje.fila = (personaje.fila % 2 == 0) ? personaje.fila + 1 : personaje.fila - 1;
         }
-    }
 
-    if (personaje.columna >= COLUMNAS && personaje.columna!=6){
-        vision='a';
-        if (personaje.fila%2==0){
-            personaje.columna = 6;
-            personaje.fila+=1;
-        } else{
-            personaje.columna = 6;
-            personaje.fila-=1;
-        }
-    }
-    
 
-    if (personaje.columna==0 && personaje.fila<0){
-        vision='d';
-        personaje.fila = 0;
-        personaje.columna = 0;
     }
-
-    if (personaje.fila==0 && personaje.columna<0){
-        vision='s';
-        personaje.fila = 0;
-        personaje.columna = 0;
-    }
-    
-    if (personaje.columna==6 && personaje.fila>6){
-        vision='w';
-        personaje.fila = 6;
-        personaje.columna = 6;
-    }
-
-    /*Falta revisar esto, no se cumple en todos los casos*/
-
-    if (personaje.fila==6 && personaje.columna>6){
-        vision='a';
-        personaje.fila = 6;
-        personaje.columna = 6;
-    }
-    
-
 }
+
+
 
 void pedirJugadores(Jugador jugadores[]) {
     for (int i = 0; i < 2; i++) {
